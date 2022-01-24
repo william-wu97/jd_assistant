@@ -7,11 +7,7 @@ import random
 import requests
 import configparser
 from log import logger
-from util import (
-    parse_json,
-    save_image,
-    open_image,
-)
+from util import parse_json, save_image, open_image
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'}
 
