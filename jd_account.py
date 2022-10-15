@@ -22,7 +22,7 @@ def load_cookies(file_name='config.ini'):
         session = requests.session()
         session.headers = headers
         session.cookies = cookies
-        if check_login(session):
+        if check_login('cookies', session):
             return True
     return False
 
@@ -132,21 +132,21 @@ def get_user_info(session):
     try:
         resp = session.get(url=url, headers=headers)
         resp_json = json.loads(resp.text)
-        return resp_json.get('nickName')
+        return resp_json.get('realName')
     except Exception:
         return 'jd'
 
 
-def check_login(session):
+def check_login(account, session):
     url = 'https://order.jd.com/center/list.action'
     try:
         resp = session.get(url=url, allow_redirects=False)
         if resp.status_code == requests.codes.OK:
-            nick_name = get_user_info(session)
-            logger.info('登录成功用户【{}】'.format(nick_name))
+            real_name = get_user_info(session)
+            logger.info('登录成功【{}】账号【{}】'.format(account, real_name))
             return True
         else:
-            logger.info('校验登录失败')
+            logger.info('登录失败【{}】'.format(account))
             return False
     except Exception as e:
         logger.error('cookies校验异常：{}'.format(e))
@@ -168,7 +168,7 @@ def login_by_qr_code():
     if not check_qr_code_ticket(session, ticket):
         logger.info('校验二维码信息失败')
         sys.exit()
-    if check_login(session):
+    if check_login('cookies', session):
         save_cookies(session.cookies)
 
 

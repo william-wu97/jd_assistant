@@ -1,14 +1,9 @@
 # coding=UTF-8
-import re
-import json
-import time
 import requests
 import threading
 import jd_account
 import jd_assistant
-from bs4 import BeautifulSoup
 from log import logger
-from timer import Timer
 from util import init_config, get_config, list_to_json, parse_sku_id
 
 if __name__ == '__main__':
@@ -36,21 +31,15 @@ if __name__ == '__main__':
             buy_time = get_time if get_time else buy_time
             session_list = []
             for account in account_list:
-                cookies_jar = jd_account.string_to_cookies(account[1])
+                cookies = jd_account.string_to_cookies(account[1])
                 session = requests.session()
                 session.headers = jd_assistant.headers
-                session.cookies = cookies_jar
-                logger.info('【{}】'.format(account[0]))
-                if jd_account.check_login(session):
-                    jd_assistant.get_jf(session)
-                    # jd_assistant.get_cart_list(session)
+                session.cookies = cookies
+                if jd_account.check_login(account[0], session):
                     jd_account.set_address(session, area)
                     if mode == '1':
-                        jd_assistant.make_reserve(session, sku_id)
-                        threading.Thread(target=jd_assistant.buy_one_item_by_time,
+                        threading.Thread(target=jd_assistant.cart_seckill_one_by_time,
                                          args=(session, sku_ids, buy_time)).start()
-                        # threading.Thread(target=jd_assistant.buy_all_item_by_time,
-                        #                  args=(session, sku_ids, buy_time)).start()
                     if mode == '2':
                         for sku_id, num in items_dict.items():
                             jd_assistant.make_reserve(session, sku_id)
@@ -65,8 +54,6 @@ if __name__ == '__main__':
                         session_list.append(session)
                     if mode == '5':
                         jd_assistant.get_order_list(session)
-                else:
-                    logger.info('跳过失效【{}】'.format(account[0]))
             if mode == '4':
                 jd_assistant.buy_item_in_stock(session_list, sku_ids, area_id)
         else:
